@@ -1,6 +1,8 @@
 1.20.1 Changelog
 47.4
 ====
+ - 47.4.8 Optimize fix for MC-176559 (#10649)
+ - 47.4.7 Ignore item equality when checking shouldCauseBlockBreakReset, fixes #10645 (#10646)
  - 47.4.6 Allow command suggestions/autocomplete to search all modded paths at once without namespace provided (#10595)
  - 47.4.5 Fix ServerChatEvent thread not using correct class loader. (#10591)
  - 47.4.4 Fix ignitedByLava making blocks permanently flammable (#10570)

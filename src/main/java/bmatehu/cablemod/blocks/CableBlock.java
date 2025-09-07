@@ -98,7 +98,7 @@ public class CableBlock extends Block implements EntityBlock {
         for(Direction direction : directions) {
             state = state.setValue(getSideProperty(direction), RedstoneSide.SIDE);
         }
-        pLevel.setBlock(pPos, state, Block.UPDATE_CLIENTS);
+        pLevel.setBlockAndUpdate(pPos, state);
     }
 
     @ParametersAreNonnullByDefault
