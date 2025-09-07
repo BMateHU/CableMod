@@ -1,0 +1,57 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "cablemod:block/cable_block"
+      }
+    },
+    {
+      "when": {
+        "north": "side|up"
+      },
+      "apply": {
+        "model": "cablemod:block/cable_block_north"
+      }
+    },
+    {
+      "when": {
+        "east": "side|up"
+      },
+      "apply": {
+        "model": "cablemod:block/cable_block_east"
+      }
+    },
+    {
+      "when": {
+        "south": "side|up"
+      },
+      "apply": {
+        "model": "cablemod:block/cable_block_south"
+      }
+    },
+    {
+      "when": {
+        "west": "side|up"
+      },
+      "apply": {
+        "model": "cablemod:block/cable_block_west"
+      }
+    },
+    {
+      "when": {
+        "above": "side|up"
+      },
+      "apply": {
+        "model": "cablemod:block/cable_block_above"
+      }
+    },
+    {
+      "when": {
+        "below": "side|up"
+      },
+      "apply": {
+        "model": "cablemod:block/cable_block_below"
+      }
+    }
+  ]
+}
