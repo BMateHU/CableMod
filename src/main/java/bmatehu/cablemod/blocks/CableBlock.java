@@ -118,9 +118,8 @@ public class CableBlock extends Block implements EntityBlock {
         List<Direction> directions = new ArrayList<>();
         for(Direction direction : Direction.values()) {
             BlockEntity beNeigh = placeContext.getLevel().getBlockEntity(placeContext.getClickedPos().relative(direction));
-            BlockEntity be = placeContext.getLevel().getBlockEntity(placeContext.getClickedPos());
-            if(beNeigh != null && be != null)
-                if(beNeigh.getCapability(ForgeCapabilities.ENERGY, direction.getOpposite()).isPresent() && be.getCapability(ForgeCapabilities.ENERGY, direction).isPresent())
+            if(beNeigh != null)
+                if(beNeigh.getCapability(ForgeCapabilities.ENERGY, direction.getOpposite()).isPresent())
                     directions.add(direction);
         }
         BlockState state = this.defaultBlockState();
