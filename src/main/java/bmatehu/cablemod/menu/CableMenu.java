@@ -1,5 +1,6 @@
 package bmatehu.cablemod.menu;
 
+import bmatehu.cablemod.CableMod;
 import bmatehu.cablemod.blocks.CableBlock;
 import bmatehu.cablemod.blocks.CableBlockEntity;
 import bmatehu.cablemod.network.CableBlockPacket;
@@ -7,10 +8,13 @@ import bmatehu.cablemod.network.CableModPacketHandler;
 import bmatehu.cablemod.registers.EBlocks;
 import bmatehu.cablemod.registers.EMenuTypes;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.ImageButton;
+import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.*;
@@ -23,12 +27,12 @@ public class CableMenu extends AbstractContainerMenu {
 
     public static ContainerLevelAccess access;
 
-    public static Button.Builder north_setting;
-    public static Button.Builder south_setting;
-    public static Button.Builder east_setting;
-    public static Button.Builder west_setting;
-    public static Button.Builder up_setting;
-    public static Button.Builder down_setting;
+    public static ImageButton north_setting;
+    public static ImageButton south_setting;
+    public static ImageButton east_setting;
+    public static ImageButton west_setting;
+    public static ImageButton up_setting;
+    public static ImageButton down_setting;
 
     private ContainerData data;
 
@@ -74,18 +78,24 @@ public class CableMenu extends AbstractContainerMenu {
     }
 
     private void initButtons(CableBlockEntity cableBlockEntity) {
-        north_setting = new Button.Builder(Component.literal("NORTH"), (button) -> stateChanger(Direction.NORTH, cableBlockEntity))
-                .size(18, 18);
-        south_setting = new Button.Builder(Component.literal("SOUTH"), (button) -> stateChanger(Direction.SOUTH, cableBlockEntity))
-                .size(18, 18);
-        east_setting = new Button.Builder(Component.literal("EAST"), (button) -> stateChanger(Direction.EAST, cableBlockEntity))
-                .size(18, 18);
-        west_setting = new Button.Builder(Component.literal("WEST"), (button) -> stateChanger(Direction.WEST, cableBlockEntity))
-                .size(18, 18);
-        up_setting = new Button.Builder(Component.literal("ABOVE"), (button) -> stateChanger(Direction.UP, cableBlockEntity))
-                .size(18, 18);
-        down_setting = new Button.Builder(Component.literal("BELOW"), (button) -> stateChanger(Direction.DOWN, cableBlockEntity))
-                .size(18, 18);
+        north_setting = new ImageButton(0, 0, 20, 18, 0, 0, 19,
+                ResourceLocation.fromNamespaceAndPath(CableMod.MODID, "textures/gui/north_button.png"),
+                button -> stateChanger(Direction.NORTH, cableBlockEntity));
+        south_setting = new ImageButton(0, 0, 20, 18, 0, 0, 19,
+                ResourceLocation.fromNamespaceAndPath(CableMod.MODID, "textures/gui/south_button.png"),
+                button -> stateChanger(Direction.SOUTH, cableBlockEntity));
+        east_setting = new ImageButton(0, 0, 20, 18, 0, 0, 19,
+                ResourceLocation.fromNamespaceAndPath(CableMod.MODID, "textures/gui/east_button.png"),
+                button -> stateChanger(Direction.EAST, cableBlockEntity));
+        west_setting = new ImageButton(0, 0, 20, 18, 0, 0, 19,
+                ResourceLocation.fromNamespaceAndPath(CableMod.MODID, "textures/gui/west_button.png"),
+                button -> stateChanger(Direction.WEST, cableBlockEntity));
+        up_setting = new ImageButton(0, 0, 20, 18, 0, 0, 19,
+                ResourceLocation.fromNamespaceAndPath(CableMod.MODID, "textures/gui/up_button.png"),
+                button -> stateChanger(Direction.UP, cableBlockEntity));
+        down_setting = new ImageButton(0, 0, 20, 18, 0, 0, 19,
+                ResourceLocation.fromNamespaceAndPath(CableMod.MODID, "textures/gui/down_button.png"),
+                button -> stateChanger(Direction.DOWN, cableBlockEntity));
     }
 
     private static void stateChanger(Direction property, CableBlockEntity cableBlockEntity) {

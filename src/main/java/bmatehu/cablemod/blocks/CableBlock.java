@@ -1,6 +1,8 @@
 package bmatehu.cablemod.blocks;
 
 import bmatehu.cablemod.registers.EBlockEntityTypes;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
@@ -87,12 +89,17 @@ public class CableBlock extends Block implements EntityBlock {
     @Override
     public void neighborChanged(BlockState pState, Level pLevel, BlockPos pPos, Block pNeighborBlock, BlockPos pNeighborPos, boolean pMovedByPiston) {
         List<Direction> directions = new ArrayList<>();
+        //BiMap<BlockEntity, Integer> neighEntities = HashBiMap.create();
         for(Direction direction : Direction.values()) {
             BlockEntity beNeigh = pLevel.getBlockEntity(pPos.relative(direction));
             BlockEntity be = pLevel.getBlockEntity(pPos);
             if(beNeigh != null && be != null)
-                if(beNeigh.getCapability(ForgeCapabilities.ENERGY, direction.getOpposite()).isPresent() && be.getCapability(ForgeCapabilities.ENERGY, direction).isPresent())
+                if(beNeigh.getCapability(ForgeCapabilities.ENERGY, direction.getOpposite()).isPresent()
+                        && be.getCapability(ForgeCapabilities.ENERGY, direction).isPresent()) {
                     directions.add(direction);
+                    //neighEntities.put()
+                    //((CableBlockEntity) be).setBlockEntities(neighEntities);
+                }
         }
         BlockState state = this.defaultBlockState();
         for(Direction direction : directions) {
@@ -122,7 +129,7 @@ public class CableBlock extends Block implements EntityBlock {
                 if(beNeigh.getCapability(ForgeCapabilities.ENERGY, direction.getOpposite()).isPresent())
                     directions.add(direction);
         }
-        BlockState state = this.defaultBlockState();
+        BlockState state = super.getStateForPlacement(placeContext);
         for(Direction direction : directions) {
             state = state.setValue(getSideProperty(direction), RedstoneSide.SIDE);
         }

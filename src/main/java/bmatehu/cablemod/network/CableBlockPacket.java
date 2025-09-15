@@ -31,9 +31,6 @@ public class CableBlockPacket {
 
     public CableBlockPacket(FriendlyByteBuf buf) {
         this.pos = buf.readBlockPos();
-//        for(int i = 0; i < 6; i++)
-//            side.add(buf.readEnum(RedstoneSide.class));
-        //this.map = buf.readMap((buf1) -> buf1.readEnum(Direction.class), (buf2) -> buf2.readEnum(CableBlock.IOEnergy.class));
         this.direction = buf.readEnum(Direction.class);
         this.ioEnergy = buf.readEnum(CableBlock.IOEnergy.class);
     }
@@ -42,13 +39,6 @@ public class CableBlockPacket {
         buf.writeBlockPos(pos);
         buf.writeEnum(direction);
         buf.writeEnum(ioEnergy);
-        //buf.writeMap(map, FriendlyByteBuf::writeEnum, FriendlyByteBuf::writeEnum);
-//        buf.writeEnum(state.getValue(CableBlock.NORTH));
-//        buf.writeEnum(state.getValue(CableBlock.EAST));
-//        buf.writeEnum(state.getValue(CableBlock.SOUTH));
-//        buf.writeEnum(state.getValue(CableBlock.WEST));
-//        buf.writeEnum(state.getValue(CableBlock.ABOVE));
-//        buf.writeEnum(state.getValue(CableBlock.BELOW));
     }
 
     public void handle(Supplier<NetworkEvent.Context> contextSupplier) {
@@ -61,14 +51,6 @@ public class CableBlockPacket {
                 level.setBlockAndUpdate(pos, level.getBlockState(pos));
                 level.setBlockAndUpdate(pos.relative(direction), level.getBlockState(pos.relative(direction)));
             }
-//            state = level.getBlockState(pos)
-//                    .setValue(CableBlock.NORTH, (RedstoneSide) side.get(0))
-//                    .setValue(CableBlock.EAST, (RedstoneSide) side.get(1))
-//                    .setValue(CableBlock.SOUTH, (RedstoneSide) side.get(2))
-//                    .setValue(CableBlock.WEST, (RedstoneSide) side.get(3))
-//                    .setValue(CableBlock.ABOVE, (RedstoneSide) side.get(4))
-//                    .setValue(CableBlock.BELOW, (RedstoneSide) side.get(5));
-
         });
 
         contextSupplier.get().setPacketHandled(true);

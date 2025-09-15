@@ -4,6 +4,8 @@ import bmatehu.cablemod.CableMod;
 import bmatehu.cablemod.energy.EnergyHelper;
 import bmatehu.cablemod.menu.CableMenu;
 import bmatehu.cablemod.registers.EBlockEntityTypes;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -36,12 +38,15 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class CableBlockEntity extends BlockEntity implements MenuProvider {
 
     protected EnergyHelper energy = new EnergyHelper(10000, 1000, 1000);
     private final LazyOptional<EnergyStorage> energyCap = LazyOptional.of(() -> energy);
     private final Map<Direction, CableBlock.IOEnergy> enabledSides = new LinkedHashMap<>();
+
+    //private final BiMap<BlockEntity, Integer> blockEntities = HashBiMap.create();
 
     private final ContainerData containerData = new ContainerData() {
 
@@ -151,13 +156,16 @@ public class CableBlockEntity extends BlockEntity implements MenuProvider {
     }
 
     public static <T extends BlockEntity> void tick(Level level, BlockPos blockPos, BlockState blockState, T t) {
-        if(t instanceof IEnergyStorage currentBlock && !level.isClientSide()) {
+        if(!level.isClientSide()) {
             for(Direction direction : Direction.values()) {
+                LazyOptional<IEnergyStorage> originalCap = t.getCapability(ForgeCapabilities.ENERGY, direction);
                 BlockEntity bl = level.getBlockEntity(blockPos.relative(direction));
-
-                if (bl instanceof IEnergyStorage aboveBlock) {
-                    if (currentBlock.canExtract())
-                        aboveBlock.receiveEnergy(currentBlock.extractEnergy(10, false), false);
+                if(bl == null)
+                    continue;
+                LazyOptional<IEnergyStorage> neighCap = bl.getCapability(ForgeCapabilities.ENERGY, direction.getOpposite());
+                if (neighCap.isPresent() && originalCap.isPresent()) {
+ //                   if (originalCap.canExtract())
+ //                       aboveBlock.receiveEnergy(currentBlock.extractEnergy(1000, false), false);
                 }
             }
         }
@@ -177,4 +185,12 @@ public class CableBlockEntity extends BlockEntity implements MenuProvider {
     public Map<Direction, CableBlock.IOEnergy> getEnabledSides() {
         return enabledSides;
     }
+
+   // public BiMap<BlockEntity, Integer> getBlockEntities() {
+   //     return blockEntities;
+   // }
+
+   // public void setBlockEntities(BiMap<BlockEntity, Integer> blockEntities) {
+   //     this.blockEntities = blockEntities;
+   // }
 }

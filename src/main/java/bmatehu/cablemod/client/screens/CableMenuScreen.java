@@ -4,6 +4,8 @@ import bmatehu.cablemod.CableMod;
 import bmatehu.cablemod.menu.CableMenu;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.gui.screens.inventory.ContainerScreen;
+import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
@@ -26,6 +28,7 @@ public class CableMenuScreen extends AbstractContainerScreen<CableMenu> {
 
         this.imageWidth = 176;
         this.imageHeight = 222;
+        this.inventoryLabelY = this.imageHeight - 94;
     }
 
     ///Renders the background texture
@@ -40,11 +43,38 @@ public class CableMenuScreen extends AbstractContainerScreen<CableMenu> {
     public void render(@NotNull GuiGraphics pGuiGraphics, int mouseX, int mouseY, float pPartialTick) {
         super.render(pGuiGraphics, mouseX, mouseY, pPartialTick);
         renderTooltip(pGuiGraphics, mouseX, mouseY);
-        addWidget(CableMenu.down_setting.pos(this.leftPos+10, this.topPos+10).build());
-        addWidget(CableMenu.up_setting.pos(this.leftPos+28, this.topPos+10).build());
-        addWidget(CableMenu.north_setting.pos(this.leftPos+46, this.topPos+10).build());
-        addWidget(CableMenu.south_setting.pos(this.leftPos+10, this.topPos+28).build());
-        addWidget(CableMenu.east_setting.pos(this.leftPos+28, this.topPos+28).build());
-        addWidget(CableMenu.west_setting.pos(this.leftPos+46, this.topPos+28).build());
+
+        CableMenu.down_setting.setPosition(this.leftPos+100, this.topPos+80);
+        CableMenu.up_setting.setPosition(this.leftPos+100, this.topPos+40);
+        CableMenu.north_setting.setPosition(this.leftPos+75, this.topPos+40);
+        CableMenu.south_setting.setPosition(this.leftPos+75, this.topPos+80);
+        CableMenu.east_setting.setPosition(this.leftPos+100, this.topPos+60);
+        CableMenu.west_setting.setPosition(this.leftPos+50, this.topPos+60);
+
+        if(CableMenu.down_setting.isHovered()) {
+            pGuiGraphics.renderTooltip(this.font, Component.literal("Down"), mouseX, mouseY);
+        }
+        if(CableMenu.up_setting.isHovered()) {
+            pGuiGraphics.renderTooltip(this.font, Component.literal("Up"), mouseX, mouseY);
+        }
+        if(CableMenu.north_setting.isHovered()) {
+            pGuiGraphics.renderTooltip(this.font, Component.literal("North"), mouseX, mouseY);
+        }
+        if(CableMenu.south_setting.isHovered()) {
+            pGuiGraphics.renderTooltip(this.font, Component.literal("South"), mouseX, mouseY);
+        }
+        if(CableMenu.east_setting.isHovered()) {
+            pGuiGraphics.renderTooltip(this.font, Component.literal("East"), mouseX, mouseY);
+        }
+        if(CableMenu.west_setting.isHovered()) {
+            pGuiGraphics.renderTooltip(this.font, Component.literal("West"), mouseX, mouseY);
+        }
+
+        addRenderableWidget(CableMenu.down_setting);
+        addRenderableWidget(CableMenu.up_setting);
+        addRenderableWidget(CableMenu.north_setting);
+        addRenderableWidget(CableMenu.south_setting);
+        addRenderableWidget(CableMenu.east_setting);
+        addRenderableWidget(CableMenu.west_setting);
     }
 }
