@@ -54,7 +54,7 @@ public class CableBlock extends Block implements EntityBlock {
     }
 
     @Override
-    public RenderShape getRenderShape(BlockState pState) {
+    public @NotNull RenderShape getRenderShape(BlockState pState) {
         return RenderShape.MODEL;
     }
 
@@ -89,18 +89,16 @@ public class CableBlock extends Block implements EntityBlock {
     @Override
     public void neighborChanged(BlockState pState, Level pLevel, BlockPos pPos, Block pNeighborBlock, BlockPos pNeighborPos, boolean pMovedByPiston) {
         List<Direction> directions = new ArrayList<>();
-        //BiMap<BlockEntity, Integer> neighEntities = HashBiMap.create();
+        BlockEntity be = pLevel.getBlockEntity(pPos);
         for(Direction direction : Direction.values()) {
             BlockEntity beNeigh = pLevel.getBlockEntity(pPos.relative(direction));
-            BlockEntity be = pLevel.getBlockEntity(pPos);
             if(beNeigh != null && be != null)
                 if(beNeigh.getCapability(ForgeCapabilities.ENERGY, direction.getOpposite()).isPresent()
                         && be.getCapability(ForgeCapabilities.ENERGY, direction).isPresent()) {
                     directions.add(direction);
-                    //neighEntities.put()
-                    //((CableBlockEntity) be).setBlockEntities(neighEntities);
                 }
         }
+
         BlockState state = this.defaultBlockState();
         for(Direction direction : directions) {
             state = state.setValue(getSideProperty(direction), RedstoneSide.SIDE);

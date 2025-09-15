@@ -35,18 +35,13 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.ParametersAreNonnullByDefault;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 public class CableBlockEntity extends BlockEntity implements MenuProvider {
 
-    protected EnergyHelper energy = new EnergyHelper(10000, 1000, 1000);
+    protected EnergyHelper energy = new EnergyHelper(50_000, 10_000, 10_000);
     private final LazyOptional<EnergyStorage> energyCap = LazyOptional.of(() -> energy);
     private final Map<Direction, CableBlock.IOEnergy> enabledSides = new LinkedHashMap<>();
-
-    //private final BiMap<BlockEntity, Integer> blockEntities = HashBiMap.create();
 
     private final ContainerData containerData = new ContainerData() {
 
@@ -64,9 +59,10 @@ public class CableBlockEntity extends BlockEntity implements MenuProvider {
 
         @Override
         public void set(int p_39285_, int p_39286_) {
-            switch (p_39285_) {
-                case 0 -> energy.setEnergy(p_39286_);
-                default -> throw new IllegalStateException("Unexpected value: " + p_39285_);
+            if (p_39285_ == 0) {
+                energy.setEnergy(p_39286_);
+            } else {
+                throw new IllegalStateException("Unexpected value: " + p_39285_);
             }
         }
 
@@ -78,7 +74,7 @@ public class CableBlockEntity extends BlockEntity implements MenuProvider {
 
     public CableBlockEntity(BlockPos pPos, BlockState pBlockState) {
         super(EBlockEntityTypes.CABLE_BLOCK.get(), pPos, pBlockState);
-        for(Direction direction : Direction.values())
+        for (Direction direction : Direction.values())
             enabledSides.put(direction, CableBlock.IOEnergy.INPUT_OUTPUT);
     }
 
@@ -88,10 +84,10 @@ public class CableBlockEntity extends BlockEntity implements MenuProvider {
 
         CompoundTag data = new CompoundTag();
         data.put("energy", this.energy.serializeNBT());
-        for(EnumProperty<RedstoneSide> prop : CableBlock.getSides()) {
+        for (EnumProperty<RedstoneSide> prop : CableBlock.getSides()) {
             data.putInt(prop.getName(), this.getBlockState().getValue(prop).ordinal());
         }
-        for(Direction direction : Direction.values()) {
+        for (Direction direction : Direction.values()) {
             data.putInt(direction.getName(), this.enabledSides.get(direction).ordinal());
         }
         nbt.put(CableMod.MODID, data);
@@ -103,14 +99,14 @@ public class CableBlockEntity extends BlockEntity implements MenuProvider {
         BlockState state = this.getBlockState();
         CompoundTag data = nbt.getCompound(CableMod.MODID);
 
-        if(data.contains("energy", Tag.TAG_INT))
+        if (data.contains("energy", Tag.TAG_INT))
             this.energy.deserializeNBT(data.get("energy"));
 
-        for(EnumProperty<RedstoneSide> prop : CableBlock.getSides())
-            if(data.contains("below", Tag.TAG_INT))
+        for (EnumProperty<RedstoneSide> prop : CableBlock.getSides())
+            if (data.contains("below", Tag.TAG_INT))
                 state.setValue(prop, data.get(prop.getName()).equals(2) ? RedstoneSide.NONE : RedstoneSide.SIDE);
 
-        for(Direction direction : Direction.values()) {
+        for (Direction direction : Direction.values()) {
             this.enabledSides.put(direction, CableBlock.IOEnergy.values()[data.getInt(direction.getName())]);
         }
 
@@ -131,11 +127,10 @@ public class CableBlockEntity extends BlockEntity implements MenuProvider {
 
     @Override
     public @NotNull <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction side) {
-        if(cap == ForgeCapabilities.ENERGY) {
+        if (cap == ForgeCapabilities.ENERGY) {
             if (this.enabledSides.get(side).equals(CableBlock.IOEnergy.INPUT_OUTPUT)) {
                 return getEnergyCap().cast();
-            }
-            else
+            } else
                 return LazyOptional.empty();
         }
         return super.getCapability(cap, side);
@@ -156,16 +151,98 @@ public class CableBlockEntity extends BlockEntity implements MenuProvider {
     }
 
     public static <T extends BlockEntity> void tick(Level level, BlockPos blockPos, BlockState blockState, T t) {
-        if(!level.isClientSide()) {
-            for(Direction direction : Direction.values()) {
-                LazyOptional<IEnergyStorage> originalCap = t.getCapability(ForgeCapabilities.ENERGY, direction);
-                BlockEntity bl = level.getBlockEntity(blockPos.relative(direction));
-                if(bl == null)
-                    continue;
-                LazyOptional<IEnergyStorage> neighCap = bl.getCapability(ForgeCapabilities.ENERGY, direction.getOpposite());
-                if (neighCap.isPresent() && originalCap.isPresent()) {
- //                   if (originalCap.canExtract())
- //                       aboveBlock.receiveEnergy(currentBlock.extractEnergy(1000, false), false);
+        if (level.isClientSide() || !(t instanceof CableBlockEntity cable)) {
+            return;
+        }
+
+        List<CableBlockEntity> networkCables = new ArrayList<>();
+        Set<BlockPos> visited = new HashSet<>();
+        discoverCables(level, blockPos, networkCables, visited);
+
+
+        BlockPos masterPos = networkCables.stream().map(BlockEntity::getBlockPos).min(Comparator.naturalOrder()).orElse(blockPos);
+        if (!blockPos.equals(masterPos)) {
+            return;
+        }
+
+        List<IEnergyStorage> producers = new ArrayList<>();
+        List<IEnergyStorage> consumers = new ArrayList<>();
+        List<IEnergyStorage> networkStorage = new ArrayList<>();
+        for (CableBlockEntity networkCable : networkCables) {
+            networkStorage.add(networkCable.getEnergy());
+            for (Direction direction : Direction.values()) {
+                BlockEntity neighbor = level.getBlockEntity(networkCable.getBlockPos().relative(direction));
+                if (neighbor != null && !(neighbor instanceof CableBlockEntity)) {
+                    neighbor.getCapability(ForgeCapabilities.ENERGY, direction.getOpposite()).ifPresent(energyStorage -> {
+                        if (energyStorage.canExtract()) {
+                            producers.add(energyStorage);
+                        }
+                        if (energyStorage.canReceive()) {
+                            consumers.add(energyStorage);
+                        }
+                    });
+                }
+            }
+        }
+
+        for (IEnergyStorage producer : producers) {
+            int energyToExtract = producer.extractEnergy(10000, true);
+            if (energyToExtract > 0) {
+                int energyPerCable = energyToExtract / networkCables.size();
+                for (CableBlockEntity networkCable : networkCables) {
+                    networkCable.getEnergy().receiveEnergy(energyPerCable, false);
+                }
+                cable.getEnergy().receiveEnergy(energyToExtract % networkCables.size(), false);
+                producer.extractEnergy(energyToExtract, false);
+            }
+        }
+
+        for (IEnergyStorage consumer : consumers) {
+            int totalEnergyInNetwork = networkStorage.stream().mapToInt(IEnergyStorage::getEnergyStored).sum();
+            int energyToTransfer = Math.min(10000, totalEnergyInNetwork);
+            int acceptedEnergy = consumer.receiveEnergy(energyToTransfer, true);
+
+            if (acceptedEnergy > 0) {
+                int energyToExtract = acceptedEnergy;
+                for (IEnergyStorage cableEnergy : networkStorage) {
+                    int extracted = cableEnergy.extractEnergy(energyToExtract / networkStorage.size(), false);
+                    energyToExtract -= extracted;
+                }
+                for (IEnergyStorage cableEnergy : networkStorage) {
+                    int extracted = cableEnergy.extractEnergy(energyToExtract, false);
+                    energyToExtract -= extracted;
+                    if (energyToExtract <= 0) break;
+                }
+
+                consumer.receiveEnergy(acceptedEnergy, false);
+            }
+        }
+
+        int totalEnergy = networkStorage.stream().mapToInt(IEnergyStorage::getEnergyStored).sum();
+        int energyPerCable = totalEnergy / networkCables.size();
+        int remainder = totalEnergy % networkCables.size();
+
+        for (CableBlockEntity networkCable : networkCables) {
+            ((EnergyHelper) networkCable.getEnergy()).setEnergy(energyPerCable);
+        }
+        cable.getEnergy().receiveEnergy(remainder, false);
+
+        networkCables.forEach(BlockEntity::setChanged);
+    }
+
+    private static void discoverCables(Level level, BlockPos pos, List<CableBlockEntity> networkCables, Set<BlockPos> visited) {
+        if (!visited.add(pos)) {
+            return; // Already visited
+        }
+
+        BlockEntity be = level.getBlockEntity(pos);
+        if (be instanceof CableBlockEntity cable) {
+            networkCables.add(cable);
+            for (Direction direction : Direction.values()) {
+                BlockPos neighborPos = pos.relative(direction);
+                BlockState neighborState = level.getBlockState(neighborPos);
+                if (neighborState.getBlock() instanceof CableBlock) {
+                    discoverCables(level, neighborPos, networkCables, visited);
                 }
             }
         }
@@ -185,12 +262,4 @@ public class CableBlockEntity extends BlockEntity implements MenuProvider {
     public Map<Direction, CableBlock.IOEnergy> getEnabledSides() {
         return enabledSides;
     }
-
-   // public BiMap<BlockEntity, Integer> getBlockEntities() {
-   //     return blockEntities;
-   // }
-
-   // public void setBlockEntities(BiMap<BlockEntity, Integer> blockEntities) {
-   //     this.blockEntities = blockEntities;
-   // }
 }
