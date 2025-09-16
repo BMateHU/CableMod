@@ -2,6 +2,7 @@ package bmatehu.cablemod.registers;
 
 import bmatehu.cablemod.CableMod;
 import bmatehu.cablemod.blocks.CableBlock;
+import bmatehu.cablemod.blocks.ElevatorBlock;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Rarity;
@@ -27,6 +28,16 @@ public class EBlocks {
     // Creates a new BlockItem with the id "examplemod:example_block", combining the namespace and path
     public static final RegistryObject<Item> CABLE_BLOCK_ITEM = EItems.REGISTER.register("cable_block", () ->
             new BlockItem(CABLE_BLOCK.get(), new Item.Properties()
+                    .rarity(Rarity.COMMON)));
+
+    public static final RegistryObject<Block> ELEVATOR_BLOCK = REGISTER.register("elevator_block", () ->
+            new ElevatorBlock(BlockBehaviour.Properties.of()
+                    .destroyTime(40)
+                    .strength(1.5f, 6f)
+                    .pushReaction(PushReaction.NORMAL)));
+
+    public static final RegistryObject<Item> ELEVATOR_BLOCK_ITEM = EItems.REGISTER.register("elevator_block", () ->
+            new BlockItem(ELEVATOR_BLOCK.get(), new Item.Properties()
                     .rarity(Rarity.COMMON)));
 
 }

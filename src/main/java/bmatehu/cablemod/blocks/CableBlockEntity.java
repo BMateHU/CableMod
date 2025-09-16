@@ -232,7 +232,7 @@ public class CableBlockEntity extends BlockEntity implements MenuProvider {
 
     private static void discoverCables(Level level, BlockPos pos, List<CableBlockEntity> networkCables, Set<BlockPos> visited) {
         if (!visited.add(pos)) {
-            return; // Already visited
+            return;
         }
 
         BlockEntity be = level.getBlockEntity(pos);

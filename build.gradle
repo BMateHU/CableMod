@@ -121,6 +121,12 @@ repositories {
     }
 }
 
+repositories {
+    flatDir {
+        dir 'libs'
+    }
+}
+
 dependencies {
     // Specify the version of Minecraft to use.
     // Any artifact can be supplied so long as it has a "userdev" classifier artifact and is a compatible patcher artifact.
@@ -135,7 +141,9 @@ dependencies {
     // compileOnly fg.deobf("mezz.jei:jei-${mc_version}-forge-api:${jei_version}")
     // runtimeOnly fg.deobf("mezz.jei:jei-${mc_version}-forge:${jei_version}")
     runtimeOnly fg.deobf("curse.maven:mekanism-268560:6552911")
+    runtimeOnly fg.deobf("curse.maven:cofh-core-69162:5374122")
 
+    // compileOnly 'mekanism:Mekanism:1.20.1-10.4.16.80:api'
 
     // Example mod dependency using a mod jar from ./libs with a flat dir repository
     // This maps to ./libs/coolmod-${mc_version}-${coolmod_version}.jar

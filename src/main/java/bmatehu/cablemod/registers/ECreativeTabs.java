@@ -21,5 +21,6 @@ public class ECreativeTabs {
             .displayItems((parameters, output) -> {
                 output.accept(EItems.EXAMPLE_ITEM.get()); // Add the example item to the tab. For your own tabs, this method is preferred over the event
                 output.accept(EBlocks.CABLE_BLOCK_ITEM.get());
+                output.accept(EBlocks.ELEVATOR_BLOCK_ITEM.get());
             }).build());
 }
