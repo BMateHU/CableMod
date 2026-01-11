@@ -1,3 +1,7 @@
+CableMod
+--------
+
+I added a block/item which has the capability to transfer energy from source to a user block. Later I'm gonna add a water pipe and lava pipe too.
 
 Source installation information for modders
 -------------------------------------------
